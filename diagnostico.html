@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico - Generación de códigos</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #0f0;
+    }
+    .diagnostic { background: #1a1a1a; padding: 15px; margin: 10px 0; border-left: 4px solid #0f0; }
+    .diagnostic h3 { margin-top: 0; color: #0ff; }
+    .error { border-left-color: #f00; }
+    .error h3 { color: #f00; }
+    .success { border-left-color: #0f0; }
+    .warning { border-left-color: #ff0; }
+    .warning h3 { color: #ff0; }
+    pre { background: #000; padding: 10px; overflow-x: auto; }
+    button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Diagnóstico de generación de códigos</h1>
+  
+  <div id="diagnostics"></div>
+  
+  <h2>Acciones rápidas:</h2>
+  <button onclick="loginAsAdmin()">Iniciar sesión como admin</button>
+  <button onclick="checkFormVisibility()">Verificar visibilidad del formulario</button>
+  <button onclick="window.location.href='./index.html'">Ir al dashboard</button>
+
+  <!-- Firebase SDK (versión 9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Configuración de Firebase -->
+  <script src="./js/firebase-config.js"></script>
+  
+  <!-- App principal -->
+  <script src="./js/app.js"></script>
+
+  <script>
+    function addDiagnostic(title, content, type = 'success') {
+      const div = document.getElementById('diagnostics');
+      const diagnostic = document.createElement('div');
+      diagnostic.className = 'diagnostic ' + type;
+      diagnostic.innerHTML = '<h3>' + title + '</h3>' + content;
+      div.appendChild(diagnostic);
+    }
+
+    function loginAsAdmin() {
+      localStorage.setItem('x7_auth', '1');
+      localStorage.setItem('x7_auth_user', 'admin@x7sebaspanel.com');
+      addDiagnostic('✅ Sesión iniciada', 'Recarga la página o ve al dashboard', 'success');
+    }
+
+    function checkFormVisibility() {
+      const form = document.getElementById('generateCodeForm');
+      const card = document.getElementById('generateCodeCard');
+      
+      if (card) {
+        const style = window.getComputedStyle(card);
+        addDiagnostic('Tarjeta de generación', 
+          'Display: ' + style.display + '<br>Visibility: ' + style.visibility, 
+          style.display === 'none' ? 'error' : 'success');
+      } else {
+        addDiagnostic('❌ Tarjeta no encontrada', 'El elemento generateCodeCard no existe en esta página', 'error');
+      }
+    }
+
+    // Ejecutar diagnósticos al cargar
+    window.addEventListener('DOMContentLoaded', function() {
+      // 1. Verificar autenticación
+      const isAuth = localStorage.getItem('x7_auth') === '1';
+      const authEmail = localStorage.getItem('x7_auth_user');
+      
+      if (isAuth && authEmail) {
+        addDiagnostic('✅ Usuario autenticado', 
+          'Email: <strong>' + authEmail + '</strong>', 'success');
+      } else {
+        addDiagnostic('❌ NO autenticado', 
+          'Debes iniciar sesión primero.<br><button onclick="window.location.href=\'./pages/auth/login.html\'">Ir a login</button>', 
+          'error');
+      }
+
+      // 2. Verificar usuarios
+      const usersRaw = localStorage.getItem('x7_users');
+      if (usersRaw) {
+        try {
+          const users = JSON.parse(usersRaw);
+          addDiagnostic('✅ Usuarios en sistema', 
+            'Total: ' + users.length + '<br><pre>' + JSON.stringify(users.map(u => ({email: u.email, fullName: u.fullName})), null, 2) + '</pre>', 
+            'success');
+        } catch (e) {
+          addDiagnostic('❌ Error leyendo usuarios', e.message, 'error');
+        }
+      }
+
+      // 3. Verificar si es admin
+      const adminEmails = ["admin@x7sebaspanel.com", "sebastianarsia@gmail.com", "manowow5@gmail.com"];
+      const isAdmin = authEmail && adminEmails.includes(authEmail.toLowerCase().trim());
+      
+      if (isAdmin) {
+        addDiagnostic('✅ Usuario ES ADMIN', 
+          'Tienes permisos para generar códigos', 'success');
+      } else {
+        addDiagnostic('❌ Usuario NO es admin', 
+          'Solo los administradores pueden generar códigos.<br>Correos admin: ' + adminEmails.join(', '), 
+          'error');
+      }
+
+      // 4. Verificar códigos existentes
+      const codesRaw = localStorage.getItem('x7_wallet_codes');
+      if (codesRaw) {
+        try {
+          const codes = JSON.parse(codesRaw);
+          addDiagnostic('📦 Códigos en localStorage', 
+            'Total: ' + codes.length + '<br><pre>' + JSON.stringify(codes.slice(0, 3), null, 2) + '</pre>', 
+            'success');
+        } catch (e) {
+          addDiagnostic('❌ Error leyendo códigos', e.message, 'error');
+        }
+      } else {
+        addDiagnostic('⚠️ Sin códigos', 'No hay códigos generados aún', 'warning');
+      }
+
+      // 5. Verificar Firestore
+      if (typeof window.db !== 'undefined' && window.db !== null) {
+        addDiagnostic('✅ Firestore disponible', 
+          'Los códigos se pueden guardar en la nube', 'success');
+      } else {
+        addDiagnostic('⚠️ Firestore no disponible', 
+          'Los códigos solo se guardarán en este dispositivo (localStorage)', 'warning');
+      }
+
+      // 6. Verificar formulario
+      setTimeout(checkFormVisibility, 100);
+    });
+  </script>
+</body>
+</html>

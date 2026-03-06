@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generar Código - Modo Directo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #0f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(0, 255, 0, 0.05);
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      text-shadow: 0 0 10px #0f0;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #0ff;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      background: #000;
+      border: 1px solid #0f0;
+      color: #0f0;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      border-radius: 5px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #0ff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #0f0;
+      color: #000;
+      border: none;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+    }
+    button:hover {
+      background: #0ff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #0f0;
+      border-radius: 5px;
+      display: none;
+    }
+    .result.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .code-display {
+      font-size: 20px;
+      text-align: center;
+      margin: 15px 0;
+      padding: 15px;
+      background: #000;
+      border: 1px dashed #0f0;
+      word-break: break-all;
+      color: #0ff;
+      text-shadow: 0 0 5px #0ff;
+    }
+    .copy-btn {
+      width: auto;
+      padding: 10px 20px;
+      font-size: 14px;
+      margin-top: 10px;
+      background: #0ff;
+    }
+    .info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+    }
+    .success { color: #0f0; }
+    .warning { color: #ff0; }
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .stats div {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .stats span { color: #0ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎫 GENERADOR DE CÓDIGOS</h1>
+    
+    <form id="codeForm">
+      <div class="form-group">
+        <label for="amount">💰 Monto del código (MXN):</label>
+        <input type="number" id="amount" min="1" step="0.01" value="100" required>
+      </div>
+      
+      <button type="submit">⚡ GENERAR CÓDIGO AHORA</button>
+    </form>
+
+    <div class="result" id="result">
+      <h2 style="text-align: center; margin-bottom: 15px;">✅ CÓDIGO GENERADO</h2>
+      <div class="code-display" id="codeDisplay"></div>
+      <div style="text-align: center;">
+        <button class="copy-btn" onclick="copiarCodigo()">📋 COPIAR CÓDIGO</button>
+      </div>
+      <div class="info" id="infoMsg"></div>
+    </div>
+
+    <div class="stats">
+      <div><strong>Estado:</strong> <span id="status">Listo</span></div>
+      <div><strong>Códigos generados:</strong> <span id="totalCodes">0</span></div>
+      <div><strong>Almacenamiento:</strong> <span id="storage">localStorage</span></div>
+    </div>
+  </div>
+
+  <script>
+    let lastGeneratedCode = '';
+
+    // Función para generar código
+    function generarCodigo(monto) {
+      const timestamp = Date.now();
+      const codigo = "X7-" + timestamp.toString(36).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900);
+      
+      const nuevoCode = {
+        code: codigo,
+        amount: parseFloat(monto),
+        createdBy: 'admin@x7sebaspanel.com',
+        createdAt: timestamp,
+        redeemed: false,
+        redeemedBy: '',
+        redeemedAt: 0
+      };
+
+      // Guardar en localStorage
+      try {
+        const codigosActuales = JSON.parse(localStorage.getItem('x7_wallet_codes') || '[]');
+        codigosActuales.unshift(nuevoCode);
+        localStorage.setItem('x7_wallet_codes', JSON.stringify(codigosActuales));
+        console.log('✅ Código guardado en localStorage:', codigo);
+        return { ok: true, data: nuevoCode };
+      } catch (error) {
+        console.error('❌ Error guardando código:', error);
+        return { ok: false, error: error.message };
+      }
+    }
+
+    // Copiar código al portapapeles
+    function copiarCodigo() {
+      if (!lastGeneratedCode) return;
+      
+      navigator.clipboard.writeText(lastGeneratedCode).then(() => {
+        document.getElementById('infoMsg').innerHTML = '<span class="success">✅ Código copiado al portapapeles</span>';
+      }).catch(() => {
+        const tempInput = document.createElement('input');
+        tempInput.value = lastGeneratedCode;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        document.getElementById('infoMsg').innerHTML = '<span class="success">✅ Código copiado</span>';
+      });
+    }
+
+    // Actualizar estadísticas
+    function actualizarStats() {
+      try {
+        const codigos = JSON.parse(localStorage.getItem('x7_wallet_codes') || '[]');
+        document.getElementById('totalCodes').textContent = codigos.length;
+      } catch (e) {
+        document.getElementById('totalCodes').textContent = '0';
+      }
+    }
+
+    // Manejar envío del formulario
+    document.getElementById('codeForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const monto = document.getElementById('amount').value;
+      document.getElementById('status').textContent = 'Generando...';
+      
+      setTimeout(() => {
+        const resultado = generarCodigo(monto);
+        
+        if (resultado.ok) {
+          lastGeneratedCode = resultado.data.code;
+          document.getElementById('codeDisplay').textContent = resultado.data.code;
+          document.getElementById('result').classList.add('show');
+          document.getElementById('infoMsg').innerHTML = 
+            '<span class="success">Monto: $' + resultado.data.amount + ' MXN</span><br>' +
+            '<span class="warning">⚠️ Este código solo funciona en este dispositivo (localStorage)</span>';
+          document.getElementById('status').innerHTML = '<span class="success">Código generado ✅</span>';
+          actualizarStats();
+        } else {
+          alert('Error: ' + resultado.error);
+          document.getElementById('status').innerHTML = '<span style="color:#f00">Error ❌</span>';
+        }
+      }, 300);
+    });
+
+    // Inicializar
+    actualizarStats();
+    console.log('🎫 Generador de códigos listo');
+    console.log('📍 Los códigos se guardan en localStorage con clave: x7_wallet_codes');
+  </script>
+</body>
+</html>

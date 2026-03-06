@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración rápida - Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #0f0;
+      text-align: center;
+    }
+    h1 { color: #0ff; margin-bottom: 30px; }
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      margin: 10px;
+      background: #0f0;
+      color: #000;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+    }
+    .btn:hover { background: #0ff; }
+    .info {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #0f0;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+      text-align: left;
+    }
+    .success { color: #0f0; font-weight: bold; }
+    .step { margin: 15px 0; padding: 10px; background: #111; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>⚡ Configuración Rápida de Admin</h1>
+  
+  <div class="info">
+    <h3>Problema detectado:</h3>
+    <p>El formulario de generación de códigos no aparece porque:</p>
+    <ul>
+      <li>No estás autenticado como admin</li>
+      <li>O el usuario no tiene permisos correctos</li>
+    </ul>
+  </div>
+
+  <button class="btn" onclick="configurarAdmin()">🔧 CONFIGURAR COMO ADMIN AHORA</button>
+  
+  <div id="result" style="display:none; margin-top: 30px;"></div>
+
+  <div class="info" style="margin-top: 30px;">
+    <h3>Opciones alternativas:</h3>
+    <a href="generar-codigo-directo.html" class="btn">📄 Generador directo (sin login)</a>
+    <a href="index.html" class="btn">🏠 Ir al Dashboard</a>
+  </div>
+
+  <script>
+    function configurarAdmin() {
+      const resultDiv = document.getElementById('result');
+      
+      try {
+        // 1. Configurar autenticación
+        localStorage.setItem('x7_auth', '1');
+        localStorage.setItem('x7_auth_user', 'admin@x7sebaspanel.com');
+        
+        // 2. Asegurar que existe el usuario admin en el sistema
+        let users = [];
+        try {
+          users = JSON.parse(localStorage.getItem('x7_users') || '[]');
+        } catch (e) {
+          users = [];
+        }
+        
+        // Verificar si admin existe
+        const adminExists = users.some(u => u.email === 'admin@x7sebaspanel.com');
+        
+        if (!adminExists) {
+          // Crear usuario admin
+          const adminUser = {
+            email: "admin@x7sebaspanel.com",
+            password: "123456",
+            fullName: "Administrador X7",
+            username: "x7admin",
+            whatsapp: "+52 962 140 6226",
+            bio: "Panel principal de Store de x7sebaspanel",
+            avatarUrl: "",
+            balance: 1500,
+            passwordSalt: "",
+            passwordHash: ""
+          };
+          users.push(adminUser);
+          localStorage.setItem('x7_users', JSON.stringify(users));
+        }
+        
+        // 3. Guardar usuario actual
+        const currentUser = users.find(u => u.email === 'admin@x7sebaspanel.com');
+        if (currentUser) {
+          localStorage.setItem('x7_user', JSON.stringify(currentUser));
+        }
+        
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+          <div class="info">
+            <h3 class="success">✅ Configuración completada</h3>
+            <div class="step">1. Usuario: <strong>admin@x7sebaspanel.com</strong></div>
+            <div class="step">2. Sesión iniciada automáticamente</div>
+            <div class="step">3. Permisos de administrador activados</div>
+            <br>
+            <p style="text-align: center;">
+              <a href="index.html" class="btn">🚀 IR AL DASHBOARD</a>
+            </p>
+            <p style="font-size: 12px; color: #888; margin-top: 20px; text-align: center;">
+              El formulario de "Generar código de canje" debe aparecer ahora en el dashboard
+            </p>
+          </div>
+        `;
+        
+        console.log('✅ Configuración de admin completada');
+        console.log('Usuario autenticado:', localStorage.getItem('x7_auth_user'));
+        
+      } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+          <div class="info" style="border-color: #f00;">
+            <h3 style="color: #f00;">❌ Error</h3>
+            <p>No se pudo configurar el admin: ${error.message}</p>
+          </div>
+        `;
+        console.error('Error:', error);
+      }
+    }
+  </script>
+</body>
+</html>

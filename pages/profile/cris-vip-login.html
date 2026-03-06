@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cris VIP | Login y Registro</title>
+  <style>
+    :root {
+      --bg: #2a0000;
+      --card: #4a0000;
+      --card-soft: #5e0000;
+      --text: #fff3f3;
+      --muted: #ffc9c9;
+      --accent: #ff4d4d;
+      --accent-strong: #ff1a1a;
+      --ok: #92ffb3;
+      --error: #ffd0d0;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #7a0000 0%, var(--bg) 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid #a10000;
+      border-radius: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid #b30000;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #ff8a8a;
+      background: #740000;
+      color: var(--text);
+      outline: none;
+    }
+
+    input::placeholder {
+      color: #ffd6d6;
+    }
+
+    button {
+      margin-top: 14px;
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: var(--accent);
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--accent-strong);
+    }
+
+    .msg {
+      margin-top: 10px;
+      min-height: 20px;
+      font-size: 14px;
+      color: var(--error);
+    }
+
+    .ok {
+      color: var(--ok);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ff6b6b;
+      color: #3b0000;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .codes {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--card-soft);
+      border: 1px solid #c30000;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #ffdcdc;
+    }
+
+    .deliver-box {
+      margin-top: 14px;
+      border-radius: 10px;
+      border: 1px solid #ff9d9d;
+      background: #6b0000;
+      padding: 14px;
+    }
+
+    .deliver-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    .delivered-key {
+      margin: 10px 0;
+      font-weight: 700;
+      color: #fff;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      max-width: 260px;
+      margin-top: 6px;
+      background: #d40000;
+    }
+
+    .copy-btn:hover {
+      background: #ff2a2a;
+    }
+
+    .copy-msg {
+      margin-top: 8px;
+      min-height: 18px;
+      font-size: 13px;
+      color: var(--ok);
+    }
+
+    .stock {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffe0e0;
+    }
+
+    @media (max-width: 840px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" id="authArea">
+    <section class="panel">
+      <h1>Registro</h1>
+      <p>Crea tu cuenta para poder canjear el producto <strong>Cris VIP</strong>.</p>
+      <form id="registerForm">
+        <label for="regUser">Usuario</label>
+        <input id="regUser" type="text" placeholder="Ej: juan123" required />
+
+        <label for="regPass">Contraseña</label>
+        <input id="regPass" type="password" placeholder="Mínimo 4 caracteres" required />
+
+        <button type="submit">Crear cuenta</button>
+      </form>
+      <div id="registerMsg" class="msg"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Iniciar sesión</h2>
+      <p>Ingresa con tu cuenta y canjea tu acceso.</p>
+      <form id="loginForm">
+        <label for="loginUser">Usuario</label>
+        <input id="loginUser" type="text" required />
+
+        <label for="loginPass">Contraseña</label>
+        <input id="loginPass" type="password" required />
+
+        <button type="submit">Entrar</button>
+      </form>
+      <div id="loginMsg" class="msg"></div>
+
+      <p id="keysStockInfo" class="stock">Keys restantes: -</p>
+    </section>
+  </main>
+
+  <main class="container hidden" id="vipArea">
+    <section class="panel" style="grid-column: 1 / -1;">
+      <span class="badge">ACCESO PRIVADO</span>
+      <h2 id="welcomeTitle">Bienvenido</h2>
+      <p>Canjea un código válido para recibir la entrega del producto <strong>Cris VIP</strong>.</p>
+
+      <form id="redeemForm">
+        <label for="redeemCode">Código de canje</label>
+        <input id="redeemCode" type="text" placeholder="Ej: CRISVIP-2026-A1Z9" required />
+        <button type="submit">Canjear Cris VIP</button>
+      </form>
+      <div id="redeemMsg" class="msg"></div>
+
+      <div id="deliveryResult" class="deliver-box hidden">
+        <strong>Entrega completada: Key Cris VIP</strong>
+        <p>Última key entregada:</p>
+        <p id="deliveredKeyValue" class="delivered-key">-</p>
+        <button id="copyKeyBtn" class="copy-btn" type="button">Copiar key</button>
+        <p id="copyMsg" class="copy-msg"></p>
+      </div>
+
+      <button id="logoutBtn" type="button" style="margin-top: 20px; background: #c40000;">Cerrar sesión</button>
+    </section>
+  </main>
+
+  <script>
+    const USERS_KEY = "crisVipUsers";
+    const SESSION_KEY = "crisVipSession";
+    const REDEEMED_KEY = "crisVipRedeemedCodes";
+
+    const VALID_CODES = [
+      "CRISVIP-2026-A1Z9",
+      "CRISVIP-2026-B7X4",
+      "CRISVIP-2026-K2Q8",
+      "CRISVIP-2026-M5N3",
+      "CRISVIP-2026-R8P1",
+      "CRISVIP-2026-T4V6",
+      "CRISVIP-2026-Y6D2",
+      "CRISVIP-2026-Z1W7",
+      "CRISVIP-2026-H3J9",
+      "CRISVIP-2026-L7S4",
+      "CRISVIP-2026-N2C5",
+      "CRISVIP-2026-Q9E6"
+    ];
+
+    const PRODUCT_KEYS = [
+      "crispanelvip1",
+      "crispanelvip12",
+      "crispanelvip123",
+      "crispanelvip1234",
+      "crispanelvip12345",
+      "crispanelvip123456",
+      "crispanelvip1234567",
+      "crispanelvip8",
+      "crispanelvip85",
+      "crispanelvip858"
+    ];
+
+    const registerForm = document.getElementById("registerForm");
+    const loginForm = document.getElementById("loginForm");
+    const redeemForm = document.getElementById("redeemForm");
+
+    const registerMsg = document.getElementById("registerMsg");
+    const loginMsg = document.getElementById("loginMsg");
+    const redeemMsg = document.getElementById("redeemMsg");
+
+    const authArea = document.getElementById("authArea");
+    const vipArea = document.getElementById("vipArea");
+    const welcomeTitle = document.getElementById("welcomeTitle");
+    const deliveryResult = document.getElementById("deliveryResult");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const deliveredKeyValue = document.getElementById("deliveredKeyValue");
+    const copyKeyBtn = document.getElementById("copyKeyBtn");
+    const copyMsg = document.getElementById("copyMsg");
+    const keysStockInfo = document.getElementById("keysStockInfo");
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function getRedeemed() {
+      return JSON.parse(localStorage.getItem(REDEEMED_KEY) || "[]");
+    }
+
+    function setRedeemed(codes) {
+      localStorage.setItem(REDEEMED_KEY, JSON.stringify(codes));
+    }
+
+    function setSession(username) {
+      localStorage.setItem(SESSION_KEY, username);
+    }
+
+    function clearSession() {
+      localStorage.removeItem(SESSION_KEY);
+    }
+
+    function getSession() {
+      return localStorage.getItem(SESSION_KEY);
+    }
+
+    function showMessage(el, text, ok = false) {
+      el.textContent = text;
+      el.classList.toggle("ok", ok);
+    }
+
+    function getUserDeliveredKeys(user) {
+      if (!user) {
+        return [];
+      }
+
+      if (Array.isArray(user.deliveredKeys)) {
+        return user.deliveredKeys.filter((key) => Boolean(key));
+      }
+
+      return user.deliveredKey ? [user.deliveredKey] : [];
+    }
+
+    function renderDelivery(user) {
+      const deliveredKeys = getUserDeliveredKeys(user);
+
+      if (deliveredKeys.length > 0) {
+        const lastDeliveredKey = deliveredKeys[deliveredKeys.length - 1];
+        deliveredKeyValue.textContent = `${lastDeliveredKey} (canjes: ${deliveredKeys.length})`;
+        deliveryResult.classList.remove("hidden");
+      } else {
+        deliveredKeyValue.textContent = "-";
+        deliveryResult.classList.add("hidden");
+      }
+      copyMsg.textContent = "";
+    }
+
+    async function copyCurrentKey() {
+      const key = deliveredKeyValue.textContent.trim();
+      if (!key || key === "-") {
+        copyMsg.textContent = "No hay key para copiar.";
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(key);
+        copyMsg.textContent = "Key copiada.";
+      } catch (error) {
+        const tempInput = document.createElement("input");
+        tempInput.value = key;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        copyMsg.textContent = "Key copiada.";
+      }
+    }
+
+    function getNextProductKey(users) {
+      const usedKeys = users.flatMap((u) => getUserDeliveredKeys(u));
+
+      return PRODUCT_KEYS.find((key) => !usedKeys.includes(key)) || null;
+    }
+
+    function updateKeysStockInfo() {
+      const users = getUsers();
+      const usedCount = users.reduce((total, user) => total + getUserDeliveredKeys(user).length, 0);
+      const remaining = Math.max(PRODUCT_KEYS.length - usedCount, 0);
+      keysStockInfo.textContent = `Keys restantes: ${remaining}`;
+    }
+
+    function showVip(username) {
+      authArea.classList.add("hidden");
+      vipArea.classList.remove("hidden");
+      welcomeTitle.textContent = `Bienvenido, ${username}`;
+      showMessage(redeemMsg, "");
+      const users = getUsers();
+      const user = users.find((u) => u.username === username);
+      renderDelivery(user);
+      updateKeysStockInfo();
+    }
+
+    function showAuth() {
+      vipArea.classList.add("hidden");
+      authArea.classList.remove("hidden");
+      deliveryResult.classList.add("hidden");
+      deliveredKeyValue.textContent = "-";
+      copyMsg.textContent = "";
+      showMessage(loginMsg, "");
+      showMessage(registerMsg, "");
+      updateKeysStockInfo();
+    }
+
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("regUser").value.trim();
+      const password = document.getElementById("regPass").value;
+
+      if (username.length < 3 || password.length < 4) {
+        showMessage(registerMsg, "Usuario mínimo 3 caracteres y contraseña mínimo 4.");
+        return;
+      }
+
+      const users = getUsers();
+      const exists = users.some((u) => u.username.toLowerCase() === username.toLowerCase());
+
+      if (exists) {
+        showMessage(registerMsg, "Ese usuario ya existe.");
+        return;
+      }
+
+      users.push({ username, password, deliveredKeys: [] });
+      setUsers(users);
+      updateKeysStockInfo();
+      showMessage(registerMsg, "Cuenta creada. Ahora inicia sesión.", true);
+      registerForm.reset();
+    });
+
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("loginUser").value.trim();
+      const password = document.getElementById("loginPass").value;
+      const users = getUsers();
+      const user = users.find((u) => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+
+      if (!user) {
+        showMessage(loginMsg, "Credenciales inválidas.");
+        return;
+      }
+
+      setSession(user.username);
+      showVip(user.username);
+      loginForm.reset();
+    });
+
+    redeemForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const code = document.getElementById("redeemCode").value.trim().toUpperCase();
+      const currentUser = getSession();
+
+      if (!currentUser) {
+        showMessage(redeemMsg, "Debes iniciar sesión primero.");
+        return;
+      }
+
+      const users = getUsers();
+      const userIndex = users.findIndex((u) => u.username === currentUser);
+      if (userIndex === -1) {
+        showMessage(redeemMsg, "Usuario no encontrado. Vuelve a iniciar sesión.");
+        return;
+      }
+
+      if (!VALID_CODES.includes(code)) {
+        showMessage(redeemMsg, "Código inválido.");
+        return;
+      }
+
+      const redeemedCodes = getRedeemed();
+      if (redeemedCodes.includes(code)) {
+        showMessage(redeemMsg, "Ese código ya fue usado por otra persona.");
+        return;
+      }
+
+      const productKey = getNextProductKey(users);
+      if (!productKey) {
+        showMessage(redeemMsg, "Hay keys insuficientes. Ya no hay keys de producto disponibles.");
+        return;
+      }
+
+      const userDeliveredKeys = getUserDeliveredKeys(users[userIndex]);
+      userDeliveredKeys.push(productKey);
+      users[userIndex].deliveredKeys = userDeliveredKeys;
+      users[userIndex].deliveredKey = productKey;
+      setUsers(users);
+      redeemedCodes.push(code);
+      setRedeemed(redeemedCodes);
+
+      showMessage(redeemMsg, "Código válido. Entrega realizada correctamente.", true);
+      renderDelivery(users[userIndex]);
+      updateKeysStockInfo();
+      redeemForm.reset();
+    });
+
+    copyKeyBtn.addEventListener("click", () => {
+      copyCurrentKey();
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      clearSession();
+      showAuth();
+    });
+
+    const activeSession = getSession();
+    updateKeysStockInfo();
+    if (activeSession) {
+      showVip(activeSession);
+    }
+  </script>
+</body>
+</html>

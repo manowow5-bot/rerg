@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso Admin Directo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #0f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      text-align: center;
+      background: rgba(0, 255, 0, 0.05);
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      padding: 40px;
+      max-width: 500px;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #0f0;
+    }
+    .loading {
+      font-size: 18px;
+      margin: 20px 0;
+      color: #0ff;
+    }
+    .spinner {
+      border: 3px solid rgba(0, 255, 0, 0.3);
+      border-top: 3px solid #0f0;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .steps {
+      text-align: left;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .step {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border-left: 3px solid #0f0;
+    }
+    .step.done {
+      border-left-color: #0ff;
+      color: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Acceso Admin Directo</h1>
+    <div class="spinner"></div>
+    <p class="loading">Configurando sesión de administrador...</p>
+    
+    <div class="steps">
+      <div class="step" id="step1">⏳ Creando usuario admin...</div>
+      <div class="step" id="step2">⏳ Configurando autenticación...</div>
+      <div class="step" id="step3">⏳ Verificando permisos...</div>
+      <div class="step" id="step4">⏳ Redirigiendo al dashboard...</div>
+    </div>
+  </div>
+
+  <script>
+    function markStepDone(stepId) {
+      const step = document.getElementById(stepId);
+      step.classList.add('done');
+      step.textContent = step.textContent.replace('⏳', '✅');
+    }
+
+    async function configurarAdmin() {
+      try {
+        // Paso 1: Crear/verificar usuario admin
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const adminUser = {
+          email: "admin@x7sebaspanel.com",
+          password: "123456",
+          fullName: "Administrador X7",
+          username: "x7admin",
+          whatsapp: "+52 962 140 6226",
+          bio: "Panel principal de Store de x7sebaspanel",
+          avatarUrl: "",
+          balance: 1500,
+          passwordSalt: "",
+          passwordHash: ""
+        };
+
+        let users = [];
+        try {
+          users = JSON.parse(localStorage.getItem('x7_users') || '[]');
+        } catch (e) {
+          users = [];
+        }
+
+        const adminIndex = users.findIndex(u => u.email === 'admin@x7sebaspanel.com');
+        if (adminIndex === -1) {
+          users.push(adminUser);
+        } else {
+          users[adminIndex] = { ...users[adminIndex], ...adminUser };
+        }
+
+        localStorage.setItem('x7_users', JSON.stringify(users));
+        localStorage.setItem('x7_user', JSON.stringify(adminUser));
+        markStepDone('step1');
+
+        // Paso 2: Configurar autenticación
+        await new Promise(resolve => setTimeout(resolve, 500));
+        localStorage.setItem('x7_auth', '1');
+        localStorage.setItem('x7_auth_user', 'admin@x7sebaspanel.com');
+        markStepDone('step2');
+
+        // Paso 3: Verificar permisos (admin emails)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const adminEmails = ["admin@x7sebaspanel.com", "sebastianarsia@gmail.com", "manowow5@gmail.com"];
+        const isAdmin = adminEmails.includes('admin@x7sebaspanel.com');
+        console.log('Es admin:', isAdmin);
+        markStepDone('step3');
+
+        // Paso 4: Redirigir
+        await new Promise(resolve => setTimeout(resolve, 500));
+        markStepDone('step4');
+        
+        await new Promise(resolve => setTimeout(resolve, 800));
+        window.location.href = '../../index.html';
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.querySelector('.loading').innerHTML = 
+          '<span style="color:#f00">❌ Error: ' + error.message + '</span><br>' +
+          '<a href="../../index.html" style="color:#0ff">Ir al dashboard manualmente</a>';
+      }
+    }
+
+    // Ejecutar al cargar
+    window.addEventListener('DOMContentLoaded', configurarAdmin);
+  </script>
+</body>
+</html>
